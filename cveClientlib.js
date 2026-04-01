@@ -5,7 +5,7 @@ class cveClient {
 	this.key = key;
 	this.url = url;
 	this.user_path = "/org/" + this.org + "/user/" + this.user;
-	this._version = "1.0.15";
+	this._version = "1.0.16";
     }
     publishadp(cve,adp) {
 	let path = "/cve/" + cve + "/adp";
@@ -141,7 +141,7 @@ class cveClient {
 	    this.error = err;
 	    return;
 	}
-	url.pathname = url.pathname.replace(//$/, "") + path;
+	url.pathname = url.pathname.replace(/\/$/, "") + path;
 	if(!opts) {
 	    opts = {method:'GET'};
 	}
@@ -163,6 +163,13 @@ class cveClient {
 				     {'CVE-API-KEY': this.key,
 				      'CVE-API-ORG': this.org,
 				      'CVE-API-USER': this.user });
+	this._lastRequest = {
+            url: url.toString(),
+            method: opts.method || "GET",
+            headers: opts.headers,
+            body: opts.body ? JSON.parse(opts.body) : undefined,
+            qvars: qvars || {},
+	};
 	let client = this;
 	return fetch(url.toString(),opts).then(function(r) {
 	    client.response = r;
@@ -177,3 +184,17 @@ class cveClient {
 	});
     }
 }
+/*
+  Enable use of module in node
+  const CveClient = require('./cveClientlib');
+  const client = new CveClient.default(org, user, key, url);
+*/
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = cveClient;
+    if (typeof fetch === "undefined") {
+	fetch = require('node-fetch');
+    }
+} else if (typeof globalThis !== "undefined") {
+    globalThis.cveClient = cveClient;
+}
+export default cveClient;

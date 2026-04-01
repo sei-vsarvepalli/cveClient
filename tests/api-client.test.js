@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { createMockCveClient } from "./helpers.js";
 
-const CveClient = createMockCveClient();
+const CveClient = require('../cveClientlib').default;
+
 
 describe("cveClient — URL construction", () => {
   let client;
@@ -13,6 +14,12 @@ describe("cveClient — URL construction", () => {
       "test-api-key-12345",
       "https://cveawg.mitre.org/api",
     );
+  globalThis.fetch = vi.fn((url, opts) => {
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    })
+  });
   });
 
   it("sets correct user_path on construction", () => {
